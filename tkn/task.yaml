@@ -84,18 +84,13 @@ spec:
         TARGET_RESULTS=$(params.results-folder)
         OUTPUT_FOLDER=$(workspaces.pipelines-data.path)/$(params.workspace-resources-path)/$(params.workspace-qe-subpath)
         mkdir -p "${OUTPUT_FOLDER}"
-        
-        # --- WINDOWS COMMAND CONSTRUCTION ---
+
         if [[ $(params.os) == "windows" ]]; then
           cmd="${TARGET_FOLDER}/podman.ps1 "
           cmd="$cmd -targetFolder '${TARGET_FOLDER}' "
           cmd="$cmd -resultsFolder '${TARGET_RESULTS}' "
           cmd="$cmd -downloadUrl '$(params.download-url)' "
-          
-          # FIX: Changed '-version' to '-podmanVersion' to match common script param names
-          # and wrapped in quotes to prevent shell expansion errors.
           cmd="$cmd -podmanVersion '$(params.podman-version)' " 
-          
           cmd="$cmd -installWSL '$(params.install-wsl)' "
           cmd="$cmd -initialize '$(params.podman-initialize)' "
           cmd="$cmd -start '$(params.podman-start)' "
@@ -107,7 +102,42 @@ spec:
           fi
         fi
 
-        # --- DARWIN COMMAND CONSTRUCTION ---
         if [[ $(params.os) == "darwin" ]]; then
           cmd="${TARGET_FOLDER}/podman.sh "
-          cmd="$cmd --targetFolder '${TARGET
+          cmd="$cmd --targetFolder '${TARGET_FOLDER}' "
+          cmd="$cmd --resultsFolder '${TARGET_RESULTS}' "
+          cmd="$cmd --downloadUrl '$(params.download-url)' "
+          cmd="$cmd --version '$(params.podman-version)' "
+          cmd="$cmd --installWSL '$(params.install-wsl)' "
+          cmd="$cmd --initialize '$(params.podman-initialize)' "
+          cmd="$cmd --start '$(params.podman-start)' "
+          cmd="$cmd --rootful '$(params.podman-rootful)'"
+          
+          if [[ -n "$(params.podman-provider)" ]] && [[ "$(params.podman-provider)" != "''" ]]; then
+            cmd="$cmd --podmanProvider '$(params.podman-provider)' "
+          fi
+        fi
+        
+        echo "Executing command: ${cmd}"
+        . entrypoint.sh "${cmd}"
+
+        # Results handling
+        echo -n "${SECONDS}" | tee $(results.duration.path)
+        
+        if [ -f "${OUTPUT_FOLDER}/${TARGET_RESULTS}" ]; then
+          echo -n "$(cat ${OUTPUT_FOLDER}/${TARGET_RESULTS})" | tee $(results.podman-path.path)
+        else
+          echo "Warning: Results file not found at ${OUTPUT_FOLDER}/${TARGET_RESULTS}"
+        fi
+
+  sidecars:
+    - name: fake-rdp
+      image: quay.io/rhqp/frdp:v0.0.1
+      imagePullPolicy: Always
+      env:
+        - name: RDP_HOST
+          value: $(params.host)
+        - name: RDP_USER
+          value: $(params.username)
+        - name: RDP_PASSWORD
+          value: $(params.userpassword)
