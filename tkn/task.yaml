@@ -110,7 +110,7 @@ spec:
         cmd="$cmd -targetFolder '${TARGET_FOLDER}' "
         cmd="$cmd -resultsFolder '${TARGET_RESULTS}' "
         cmd="$cmd -downloadUrl '$(params.download-url)' "
-        cmd="$cmd -version '$(params.podman-version)' "
+        cmd="$cmd -podmanVersion '$(params.podman-version)' " 
         cmd="$cmd -installWSL '$(params.install-wsl)' "
         cmd="$cmd -initialize '$(params.podman-initialize)' "
         cmd="$cmd -start '$(params.podman-start)' "
