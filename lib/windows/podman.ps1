@@ -5,6 +5,8 @@ param(
     $resultsFolder="results",
     [Parameter(HelpMessage = 'Podman Download URL')]
     $downloadUrl='https://api.cirrus-ci.com/v1/artifact/github/containers/podman/Artifacts/binary/podman-remote-release-windows_amd64.zip',
+    [Parameter(HelpMessage = 'Podman version')]
+    $podmanVersion='', 
     [Parameter(HelpMessage = 'Initialize podman machine, default is 0/false')]
     $initialize='0',
     [Parameter(HelpMessage = 'Start Podman machine, default is 0/false')]
